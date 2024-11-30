@@ -13,4 +13,8 @@ std::string prompt_for_character_info(std::string detail);
 
 std::string prompt_for_name();
 
+std::string prompt_for_gender();
+
+std::string prompt_for_number_of_names();
+
 #endif

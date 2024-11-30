@@ -2,6 +2,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <cpr/cpr.h>
+using json = nlohmann::json;
 
 void catalog::populate_catalog_from_file(std::ifstream& file) {
     std::string first_input;
@@ -76,34 +77,42 @@ void catalog::delete_character(std::string name) {
     std::cout << std::endl;
 }
 
-std::vector<std::string> get_sorted_names(std::vector<std::string> names) {
-    using json = nlohmann::json;
+json get_sorted_names(json json_names) {
 
     std::string url = "http://127.0.0.1:5002/alphabetizer";
 
-    json json_names;
-    json_names["names"] = names;
-
-    cpr::Response response = cpr::Get(cpr::Url{url},
-                               cpr::Parameters{{"names", json_names["names"]}});
+    cpr::Response response = cpr::Post(
+        cpr::Url{url},
+        cpr::Body(json_names.dump()),
+        cpr::Header{{"Content-Type", "application/json"}}
+    );
 
     if (response.status_code == 200) {
         json_names = json::parse(response.text);
-        names = json_names["names"];
     } else {
         std::cerr << "Error: " << response.status_code << "\nDetails: " << response.text << "\n";
     }
 
-    return names;
+    return json_names;
 }
 
-std::vector<std::string> catalog::sort_characters() {
-    // Makes a vector of just the names
-    std::vector<std::string> names;
+void catalog::sort_characters() {
+    // Stores the names as a json object, with name as the key and the index as the value
+    json json_names;
     for (int i = 0; i < this->num_characters; i++) {
-        names.push_back(this->characters.at(i).get_name());
+        json_names[this->characters.at(i).get_name()] = i;
     }
 
-    names = get_sorted_names(names);
-    return names;
+    // Sorts by name
+    json_names = get_sorted_names(json_names);
+
+    std::vector<character> new_characters(this->num_characters);
+
+    int i = 0;
+    for (auto& [key, value] : json_names.items()) {
+        new_characters.at(i) = this->characters.at(value);
+        i++;
+    }
+
+    this->characters = new_characters;
 }

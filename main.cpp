@@ -17,6 +17,19 @@ void lookup_name(std::string name) {
     }
 }
 
+void lookup_list_of_names(std::string gender, std::string number) {
+    std::string url = "http://127.0.0.1:5002/name_generator";
+
+    cpr::Response response = cpr::Get(cpr::Url{url},
+                             cpr::Parameters{{"gender", gender}, {"number", number}});
+    
+    if (response.status_code == 200) {
+        std::cout << "\n" << response.text << "\n";
+    } else {
+        std::cerr << "Error: " << response.status_code << "\nDetails: " << response.text << "\n";
+    }
+}
+
 void execute_option(catalog& c, int option) {
     if (option == 1) {
         c.display_all_characters();
@@ -41,12 +54,12 @@ void execute_option(catalog& c, int option) {
         c.delete_character(name);
 
     } else if (option == 5) {
-        std::vector<std::string> sorted_names = c.sort_characters();
+        c.sort_characters();
 
-        std::cout << "Here is the list of characters in alphabetical order: " << std::endl;
-        for (int i = 0; i < sorted_names.size(); i++) {
-            std::cout << sorted_names.at(i) << std::endl;
-        }
+        // std::cout << "Here is the list of characters in alphabetical order: " << std::endl;
+        // for (int i = 0; i < sorted_names.size(); i++) {
+        //     std::cout << sorted_names.at(i) << std::endl;
+        // }
 
         std::cout << std::endl;
 
@@ -56,8 +69,14 @@ void execute_option(catalog& c, int option) {
         std::cout << std::endl;
 
     } else if (option == 7) {
+        std::string gender = prompt_for_gender();
+        std::string number = prompt_for_number_of_names();
 
-    } 
+        lookup_list_of_names(gender, number);
+
+    } else {
+
+    }
 }
 
 int main() {
@@ -74,11 +93,11 @@ int main() {
 
     do {
         print_options();
-        option = prompt_for_option(7);
+        option = prompt_for_option(8);
 
         execute_option(c, option);  
 
-    } while (option != 7);
+    } while (option != 8);
 
     std::cout << "Do you want to save your work to characters.txt? This will overwrite the file's existing information. Enter y/n: ";
     std::string input;

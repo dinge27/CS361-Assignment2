@@ -17,6 +17,8 @@ public:
      */
     void populate_catalog_from_file(std::ifstream& file);
 
+    void write_catalog_to_file(std::ofstream& file);
+
     /*
      * This function displays all characters in the catalog as a list
      */
@@ -33,6 +35,8 @@ public:
     void add_character(std::string name, std::string gender, std::string age, std::string appearance, std::string description);
 
     void delete_character(std::string name);
+
+    void sort_characters();
 };
 
 #endif
